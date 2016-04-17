@@ -1,26 +1,127 @@
 # Verilog (SystemVerilog) Coding Style
 
-## Выравнивание и отступы
+## Отступы и пробелы
+Отступ - 2 пробела. Табы (`\t`) запрещены.
 
+Отступ нужны для обозначения "вложения".
+
+Пример:
+```systemverilog
+if( a )
+  b = c;
+```
+
+### Пробелы
+Пробел должен ставится:
+  - после открывающейся `(` и перед закрывающейся скобкой `)` в конструкциях `if`, `for`, `always`, `function`, `task`, сложных логических условиях
+  - перед и после элементами, требующих двух операндов ( `&`, `|`, `&&`, `||`, `=`, `+`)
+  - перед и после использованием переменных и констант (Исключение: перед `,` и `;` пробел не ставится).
+  - перед и после `=`
+
+Примеры:
+```systemverilog
+if( a > c )
+```
+
+```systemverilog
+a = b && ( c > d );
+```
+
+```systemverilog
+a = ( b == c ) ? ( y ) : ( z );
+```
+
+### Пустые строчки
+Любые логические вещи необходимо отделять пустой строчкой.
+
+## Выравнивание и пробелы
 Выравнивание необходимо для облегчения чтения кода.
+Выравнивание производится с помощью пробелов. Табы ('\t') запрещены.
 
-- Отступ - 2 пробела. Табы `\t` запрещены.
+Необходимо выравнивать названия, размерность и комментарии по "логическим" колонкам.
+
+### Пример #1
+Неправильно:
 ```systemverilog
-  statement_1
-    statement_2 
+// BAD EXAMPLE
+logic rd_stb; //buffer read strobe
+logic [31:0] ram_data; //data from RAM block
+logic [1:0]if_mode; //interface mode
 ```
 
-- Круглые скобки оформляются так: `if( a )`: пробелы ставятся после открывающейся
-  скобки и условия. Перед открывающеся скобкой пробел не ставится.
-
-- Более сложный пример: 
+Правильно:
 ```systemverilog
-if( ( a == 5 ) && ( c > 8 ) )
+// GOOD EXAMPLE
+logic        rd_stb;    // buffer read strobe
+logic [31:0] ram_data;  // data from RAM block
+logic [1:0]  if_mode;   // interface mode
 ```
-Пробелами отделяется каждое из логических условий, причем, те условия которые находятся 
-внутри `if` тоже отделяются пробелами.
 
-### Пример выравнивания `if/else`
+### Пример #2
+Неправильно:
+```systemverilog
+// BAD EXAMPLE
+input clk_i,
+input rst_i,
+input [31:0] data_i,
+input data_valid_i,
+output logic [7:0] data_o,
+output data_valid_o
+```
+
+Правильно:
+``` systemverilog
+// GOOD EXAMPLE
+input                            clk_i,
+input                            rst_i,
+
+input         [31:0]             data_i,
+input                            data_valid_i,
+
+output  logic [7:0]              data_o,
+output                           data_valid_o
+
+```
+Примечание:
+  - по умолчанию логические колонки "разделяются" одним пробелом, однако, допускается делать 
+    больше пробелов, если это улучшает читаемость (как в примере выше).
+
+### Пример #3
+
+Неправильно:
+```systemverilog
+assign next_len = len + 16'd8;
+assign next_pkt_len = pkt_len + 16'd4;
+```
+
+Правильно:
+```systemverilog
+assign next_len     = len     + 16'd8;
+assign next_pkt_len = pkt_len + 16'd4;
+```
+
+### Пример #4
+Неправильно:
+```systemverilog
+always_ff @( posedge clk_i )
+  begin
+    pkt_data_d1 <= pkt_data_i;
+    pkt_empty_d1 <= pkt_empty_i;
+  end
+```
+
+Правильно:
+```systemverilog
+always_ff @( posedge clk_i )
+  begin
+    pkt_data_d1  <= pkt_data_i;
+    pkt_empty_d1 <= pkt_empty_i;
+  end
+```
+
+## Примеры использования конструкций и операторов
+
+### `if-else`
 
 ```systemverilog
 if( a > 5 )
@@ -29,7 +130,7 @@ else
   d = 15;
 ```
 
-### Пример выравнивания `if/else` вместе с `begin/end`
+### `if-else` вместе с `begin/end`
 
 ```systemverilog
 if( a > 5 )
@@ -44,7 +145,7 @@ else
   end
 ```
 
-### Пример выравнивания вложенного `if/else`
+### Вложенный `if-else`
 
 ```systemverilog
 if( a > 5 )
@@ -56,24 +157,16 @@ else
     c = 5;
 ```
 
-- Следует стремиться выравнивать их названия, размерность и комментарии. 
-
-Неправильно:
+### Тернарный оператор `?`
 
 ```systemverilog
-// BAD EXAMPLE
-logic rd_stb; //buffer read strobe
-logic [31:0] ram_data; //data from RAM block
-logic [1:0]if_mode; //interface mode
+assign y = ( a > c ) ? ( d ) : ( e );
 ```
 
-Правильно:
-
+Для облегчения чтения (и проверки) допускается (и во многих случаях рекомендуется) писать в две строки:
 ```systemverilog
-// GOOD EXAMPLE
-logic        rd_stb;    // buffer read strobe
-logic [31:0] ram_data;  // data from RAM block
-logic [1:0]  if_mode;   // interface mode
+assign y = ( a > c ) ? ( cnt_gt_zero ):
+                       ( cnt_le_zero );
 ```
 
 ### Оператор `case`
@@ -85,45 +178,71 @@ logic [1:0]  if_mode;   // interface mode
 case( opcode[1:0] )
   2'b00:
     begin
-      next_state = or_s;
+      next_state = OR_S;
     end
 
   2'b01:
     begin
-      next_state = and_s;
+      next_state = AND_S;
     end
 
   2'b10:
     begin
-      next_state = not_s;
+      next_state = NOT_S;
     end
 
   2'b11:
     begin
-      next_state = xor_s;
+      next_state = XOR_S;
     end
 
   default:
     begin
-      next_state = and_s;
+      next_state = AND_S;
     end
 endcase
 ``` 
 
 Если `case` простой и не подразумевает никаких вложенных конструкций в `begin/end` блоке, 
-то допускается для уменьшения строк делать так:
+то допускается делать так (для уменьшения строк и текста):
 
 ```systemverilog
 case( opcode[1:0] )
-  2'b00:   next_state = or_s;
-  2'b01:   next_state = and_s;
-  2'b10:   next_state = not_s;
-  2'b11:   next_state = xor_s;
-  default: next_state = and_s;
+  2'b00:   next_state = OR_S;
+  2'b01:   next_state = AND_S;
+  2'b10:   next_state = NOT_S;
+  2'b11:   next_state = XOR_S;
+  default: next_state = AND_S;
 endcase
 ```
 
 Заметьте, что здесь выровнено по `next_state` для облегчения чтения.
+
+### `function` и `task`
+
+```systemverilog
+function int calc_sum( input int a, int b );
+  return a + b;
+endfunction
+```
+
+```systemverilog
+task receive_pkt( output packet_t pkt );
+  ...
+endtask
+```
+
+При большом количестве аргументов допустимо сводить к описанию в столбик:
+```systemverilog
+task some_magic( 
+  input   int        a,
+  input   bit [31:0] data,
+  output  packet_t   pkt 
+);
+...
+endtask
+```
+Однако, если у вас большое количество аргументов, возможно что-то вы делаете не так...
 
 ### Еще один пример 
 ```systemverilog
@@ -147,6 +266,27 @@ else
 ## Комментарии
 Комментарии пишутся на английском языке.
 После знака комментария `//` ставится один пробел.
+
+Желательно писать комментарии перед тем блоком, который вы пояснить:
+```systemverilog
+
+// current packet word number
+always_ff @( posedge clk_i or posedge rst_i )
+  if( rst_i )
+    pkt_word <= 16'd0;
+  else
+    // reset counter at last valid packet word
+    if( pkt_valid && pkt_eop )
+      pkt_word <= 'd0;
+    else
+      if( pkt_valid )
+        pkt_word <= pkt_word + 1'd1;
+```
+
+Примечание:
+  - для описания комментариев необходимо пользоваться здравым смыслом и классическим рассуждением "лучший комментарий тот, которого нет". 
+    Пример, который расположен выше, показывает *где* необходимо располагать комментарии, но не надо комментировать каждый блок и каждую строчку 
+    (с этой точки зрения пример не совсем корректен).
 
 ## Наименование переменных и модулей
 
