@@ -146,11 +146,20 @@ always_ff @( posedge clk_i )
 Правильно:
 ```systemverilog
 // GOOD EXAMPLE
-always_ff @( posedge clk_i )
+always_ff @( posedge clk_i ) 
   begin
     pkt_data_d1  <= pkt_data_i;
     pkt_empty_d1 <= pkt_empty_i;
   end
+```
+
+Допускается:
+```systemverilog
+// GOOD EXAMPLE
+always_ff @( posedge clk_i ) begin
+  pkt_data_d1  <= pkt_data_i;
+  pkt_empty_d1 <= pkt_empty_i;
+end
 ```
 
 ## Примеры использования конструкций и операторов
@@ -170,11 +179,10 @@ assign data_ready = ( pkt_word_cnt > 8'd5 ) && ( !data_enable ) && ( pkt_len <= 
 #### Пример #2
 
 ```systemverilog
-always_comb
-  begin
-    if( data_enable && ( fifo_bytes_empty >= pkt_size ) )
-      ...
-  end
+always_comb begin
+  if( data_enable && ( fifo_bytes_empty >= pkt_size ) )
+    ...
+end
 ```
 
 #### Пример #3
@@ -196,16 +204,13 @@ else
 ### `if-else` вместе с `begin/end`
 
 ```systemverilog
-if( a > 5 )
-  begin
-    c = 7;
-    d = 5;
-  end
-else
-  begin
-    c = 3;
-    d = 7;
-  end
+if( a > 5 ) begin
+  c = 7;
+  d = 5;
+end else begin
+  c = 3;
+  d = 7;
+end
 ```
 
 ### Вложенный `if-else`
@@ -213,11 +218,10 @@ else
 ```systemverilog
 if( a > 5 )
   c = 7;
-else
-  if( a > 3 )
-    c = 4;
-  else 
-    c = 5;
+else if( a > 3 )
+  c = 4;
+else 
+  c = 5;
 ```
 
 ### Тернарный оператор `?`
@@ -241,30 +245,25 @@ assign y = ( a > c ) ? ( cnt_gt_zero ):
 
 ```systemverilog
 case( opcode[1:0] )
-  2'b00:
-    begin
+  2'b00: begin
       next_state = OR_S;
-    end
+  end
 
-  2'b01:
-    begin
+  2'b01: begin
       next_state = AND_S;
-    end
+  end
 
-  2'b10:
-    begin
+  2'b10: begin
       next_state = NOT_S;
-    end
+  end
 
-  2'b11:
-    begin
+  2'b11: begin
       next_state = XOR_S;
-    end
+  end
 
-  default:
-    begin
+  default: begin
       next_state = AND_S;
-    end
+  end
 endcase
 ``` 
 
@@ -311,41 +310,34 @@ endtask
 
 ### Еще один пример 
 ```systemverilog
-if( condition1 )
-  begin
-    for( int i = 0; i < 10; i = i + 1 )
-      statement1;
-  end
-else
-  begin
-    if( condition2 )
-      statement2;
-    else
-      if( condition3 )
-        statement3;
-      else
-        statement4;
-  end
+if( condition1 ) begin
+  for( int i = 0; i < 10; i = i + 1 )
+    statement1;
+end else begin
+  if( condition2 )
+    statement2;
+  else if( condition3 )
+    statement3;
+  else
+    statement4;
+end
 ```
 
 ## Комментарии
 Комментарии пишутся на английском языке.
 После знака комментария `//` ставится один пробел.
 
-Желательно писать комментарии перед тем блоком, который вы хотите пояснить:
+Желательно писать комментарии перед (возле) тем блоком, который необходимо пояснить:
 ```systemverilog
 
 // current packet word number
 always_ff @( posedge clk_i or posedge rst_i )
   if( rst_i )
-    pkt_word <= 16'd0;
-  else
-    // reset counter at last valid packet word
-    if( pkt_valid && pkt_eop )
-      pkt_word <= 'd0;
-    else
-      if( pkt_valid )
-        pkt_word <= pkt_word + 1'd1;
+    pkt_word <= 16'd0; 
+  else if( pkt_valid && pkt_eop ) // reset counter at last valid packet word
+    pkt_word <= 'd0;
+  else if( pkt_valid )
+    pkt_word <= pkt_word + 1'd1;
 ```
 
 Примечание:
@@ -454,10 +446,9 @@ always_ff @( posedge clk_i )
 always_ff @( posedge clk_i or posedge rst_i )
   if( rst_i )
     cnt <= 8'd0;
+  else if( srst_i )
+    cnt <= 8'd0;
   else
-    if( srst_i )
-      cnt <= 8'd0;
-    else
     ...
 ```
 
@@ -498,31 +489,26 @@ always_comb
     next_state = state;
 
     case( state )
-      IDLE_S:
-        begin
-          if( ... )
-            next_state = RUN_S;
-        end
+      IDLE_S: begin
+        if( ... )
+          next_state = RUN_S;
+      end
       
-      RUN_S:
-        begin
-          if( ... ) 
-            next_state = WAIT_S;
-          else
-            if( )
-              next_state = IDLE_S; 
-        end
+      RUN_S: begin
+        if( ... ) 
+          next_state = WAIT_S;
+        else if( )
+          next_state = IDLE_S; 
+      end
 
-      WAIT_S:
-        begin
-          if( ... )
-            next_state = RUN_S;
-        end
+      WAIT_S: begin
+        if( ... )
+          next_state = RUN_S;
+      end
 
-      default:
-        begin
+      default: begin
           next_state = IDLE_S;
-        end
+      end
 
     endcase
   end
@@ -579,10 +565,9 @@ always_comb
 
 Пример:
 ```systemverilog
-always_comb
-  begin
-    a = b + d;
-  end
+always_comb begin
+  a = b + d;
+end
 ```
 
 Категорически **запрещается**:
@@ -615,11 +600,10 @@ always_ff @( posedge clk_i )
 always_ff @( posedge clk_i or posedge rst_i )
   if( rst_i )
     cnt <= '0;
+  else if( cnt == 8'h92 )
+    cnt <= 'd0;
   else
-    if( cnt == 8'h92 )
-      cnt <= 'd0;
-    else
-      cnt <= cnt + 1'd1;
+    cnt <= cnt + 1'd1;
 ```
 
 #### Создание триггеров с начальным ненулевым значением
@@ -748,11 +732,10 @@ logic [2:0] vlan_mpls_cnt;
 // more signals
 
 // some code
-always_comb
-  begin
-    if( vlan_mpls_cnt > 2 )
-      ...
-  end
+always_comb begin
+  if( vlan_mpls_cnt > 2 )
+    ...
+end
 
 // calc vlan_mpls_cnt
 logic [1:0] vlan_cnt;

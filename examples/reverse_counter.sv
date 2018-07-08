@@ -17,13 +17,11 @@ module reverse_counter #(
 always_ff @( posedge clk_i or posedge rst_i )
   if( rst_i )
     cnt_o <= 'd0;
+  else if( set_value_en_i )
+    cnt_o <= set_value_data_i;
+  else if( reverse_i )
+    cnt_o <= cnt_o - 1'd1;
   else
-    if( set_value_en_i )
-      cnt_o <= set_value_data_i;
-    else
-      if( reverse_i )
-        cnt_o <= cnt_o - 1'd1;
-      else
-        cnt_o <= cnt_o + 1'd1;
+    cnt_o <= cnt_o + 1'd1;
 
 endmodule

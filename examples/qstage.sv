@@ -34,28 +34,23 @@ logic [MAX_DELAY-1:1][A_WIDTH-1:0] lookup_addr_d;
 logic [MAX_DELAY-1:1][D_WIDTH-1:0] lookup_data_d;
 
 always_ff @( posedge clk_i or posedge rst_i )
-  if( rst_i )
-    begin
-      for( int i = 1; i < MAX_DELAY; i++ )
-        begin
-          lookup_en_d   [ i ] <= '0;
-          lookup_addr_d [ i ] <= '0;
-          lookup_data_d [ i ] <= '0;
-        end
+  if( rst_i ) begin
+    for( int i = 1; i < MAX_DELAY; i++ ) begin
+      lookup_en_d   [ i ] <= '0;
+      lookup_addr_d [ i ] <= '0;
+      lookup_data_d [ i ] <= '0;
     end
-  else
-    begin
-      lookup_en_d   [ 1 ] <= lookup_en_i;
-      lookup_addr_d [ 1 ] <= lookup_addr_i;
-      lookup_data_d [ 1 ] <= lookup_data_i;
-      
-      for( int i = 2; i < MAX_DELAY; i++ )
-        begin
-          lookup_en_d   [ i ] <= lookup_en_d   [ i - 1 ];   
-          lookup_addr_d [ i ] <= lookup_addr_d [ i - 1 ]; 
-          lookup_data_d [ i ] <= lookup_data_d [ i - 1 ]; 
-        end
+  end else begin
+    lookup_en_d   [ 1 ] <= lookup_en_i;
+    lookup_addr_d [ 1 ] <= lookup_addr_i;
+    lookup_data_d [ 1 ] <= lookup_data_i;
+    
+    for( int i = 2; i < MAX_DELAY; i++ ) begin
+      lookup_en_d   [ i ] <= lookup_en_d   [ i - 1 ];   
+      lookup_addr_d [ i ] <= lookup_addr_d [ i - 1 ]; 
+      lookup_data_d [ i ] <= lookup_data_d [ i - 1 ]; 
     end
+  end
 
 
 simple_ram #( 
@@ -79,21 +74,17 @@ logic le_m;
 logic le_r;
 
 generate
-  if( OPT_LEVEL == 0 )
-    begin : no_opt
-      assign le_l = ( lookup_data_d[2] <= rd_data_w.l );
-      assign le_m = ( lookup_data_d[2] <= rd_data_w.m );
-      assign le_r = ( lookup_data_d[2] <= rd_data_w.r );
+  if( OPT_LEVEL == 0 ) begin : no_opt
+    assign le_l = ( lookup_data_d[2] <= rd_data_w.l );
+    assign le_m = ( lookup_data_d[2] <= rd_data_w.m );
+    assign le_r = ( lookup_data_d[2] <= rd_data_w.r );
+  end else begin : opt
+    always_ff @( posedge clk_i ) begin
+      le_l <= ( lookup_data_d[2] <= rd_data_w.l );
+      le_m <= ( lookup_data_d[2] <= rd_data_w.m );
+      le_r <= ( lookup_data_d[2] <= rd_data_w.r );
     end
-  else
-    begin : opt
-      always_ff @( posedge clk_i )
-        begin
-          le_l <= ( lookup_data_d[2] <= rd_data_w.l );
-          le_m <= ( lookup_data_d[2] <= rd_data_w.m );
-          le_r <= ( lookup_data_d[2] <= rd_data_w.r );
-        end
-    end
+  end
 endgenerate
 
 logic [1:0] next_addr_append;
